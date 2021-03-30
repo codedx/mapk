@@ -27,7 +27,7 @@ In SBT:
 
 ```scala
 resolvers += "GitHub Package Registry (codedx)" at "https://maven.pkg.github.com/codedx/_"
-libraryDependencies += "com.codedx" %% "mapk" % "1.0.0
+libraryDependencies += "com.codedx" %% "mapk" % "1.0.0"
 ```
 
 Note that if you are using the `sbt-github-packages` plugin, you can replace the `resolvers` line with
