@@ -23,6 +23,10 @@ val numThings: Option[Int] = info.get(NumThings) // None
 
 # Install
 
+> **NOTE** Apparently github packages require you to set up a personal access token in order to download them, even if they are public. 
+> That's pretty annoying and kinda defeats the purpose of making this public. 
+> At the time of writing, I'm not sure of a convenient way around this aside from giving up on github packages and just putting this on maven central instead (more work).
+
 In SBT:
 
 ```scala
