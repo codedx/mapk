@@ -14,5 +14,6 @@ scalacOptions ++= (scalaBinaryVersion.value match {
 })
 
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.4.2"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.5" % "test"
 
 addCompilerPlugin("org.typelevel" % "kind-projector" % "0.11.3" cross CrossVersion.full)
