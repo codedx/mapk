@@ -2,6 +2,9 @@ name := "mapk"
 organization := "com.codedx"
 version := "1.0.0-SNAPSHOT"
 
+githubOwner := "codedx"
+githubRepository := "mapk"
+
 scalaVersion := "2.12.13"
 crossScalaVersions := List("2.12.13", "2.13.5")
 scalacOptions := List("-deprecation", "-unchecked", "-feature", "-language:higherKinds")
