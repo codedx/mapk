@@ -1,6 +1,6 @@
 name := "mapk"
 organization := "com.codedx"
-version := "1.0.0-SNAPSHOT"
+version := "1.0.0"
 
 githubOwner := "codedx"
 githubRepository := "mapk"
