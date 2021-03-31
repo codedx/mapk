@@ -26,5 +26,5 @@ val numThings: Option[Int] = info.get(NumThings) // None
 In SBT:
 
 ```scala
-libraryDependencies += "com.codedx" %% "mapk" % "1.0.0"
+libraryDependencies += "com.codedx" %% "mapk" % "1.1.0"
 ```
