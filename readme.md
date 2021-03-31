@@ -23,25 +23,8 @@ val numThings: Option[Int] = info.get(NumThings) // None
 
 # Install
 
-> **NOTE** Apparently github packages require you to set up a personal access token in order to download them, even if they are public. 
-> That's pretty annoying and kinda defeats the purpose of making this public. 
-> At the time of writing, I'm not sure of a convenient way around this aside from giving up on github packages and just putting this on maven central instead (more work).
-
 In SBT:
 
 ```scala
-resolvers += "GitHub Package Registry (codedx)" at "https://maven.pkg.github.com/codedx/_"
 libraryDependencies += "com.codedx" %% "mapk" % "1.0.0"
 ```
-
-Note that if you are using the `sbt-github-packages` plugin, you can replace the `resolvers` line with
-`resolvers += Resolver.githubPackages("codedx")`
-
-# Developing
-
-This project uses SBT, plus the [`sbt-github-packages`](https://github.com/djspiewak/sbt-github-packages) Plugin for publishing packages to Github.
-
-The packaging plugin requires some extra configuration in the form of a `GITHUB_TOKEN` environment variable.
-Failing to set this seems to cause SBT/IntelliJ to freak out; IntelliJ won't import the project, and SBT's `update` seems to fail.
-As long as you provide a token, everything seems to be ok. 
-That said, I'm not sure what would happen if you aren't part of the `codedx` organization.
