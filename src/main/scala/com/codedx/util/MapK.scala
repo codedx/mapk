@@ -21,7 +21,7 @@ import cats.arrow.FunctionK
 import cats.data.Tuple2K
 import cats.{ Monoid, SemigroupK, ~> }
 
-class MapK[K[_], V[_]] private[MapK](private val untyped: Map[K[_], V[_]]) { self =>
+class MapK[K[_], V[_]] private[MapK](val untyped: Map[K[_], V[_]]) { self =>
 	type Entry[x] = (K[x], V[x])
 	type Combiner[x] = (V[x], V[x]) => V[x]
 

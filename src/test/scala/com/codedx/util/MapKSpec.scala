@@ -46,6 +46,13 @@ class MapKSpec extends AnyFunSpec with Matchers {
 		.updated(Name, List("a", "b"))
 
 	describe("MapK") {
+		describe(".untyped") {
+			it("should return a regular Map containing the same entries, minus the explicit type information") {
+				val u = ezio.untyped
+				u shouldEqual Map[MyKey[_], Any](Age -> 65, Name -> "Ezio Auditore", Fingers -> 9)
+			}
+		}
+
 		describe(".contains(key)") {
 			it ("should return false when the map does not contain the given key") {
 				ezio.contains(Extra) shouldBe false
