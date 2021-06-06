@@ -30,7 +30,7 @@ val numThings: Option[Int] = info.get(NumThings) // None
 In SBT:
 
 ```scala
-libraryDependencies += "com.codedx" %% "mapk" % "1.1.0"
+libraryDependencies += "com.codedx" %% "mapk" % "1.2.0"
 ```
 
 Disregard the "packages" on the sidebar. Despite this being a public project, you still need to provide a personal access token to download the packages. Very annoying.
