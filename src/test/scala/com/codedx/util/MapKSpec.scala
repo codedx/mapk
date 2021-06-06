@@ -46,6 +46,34 @@ class MapKSpec extends AnyFunSpec with Matchers {
 		.updated(Name, List("a", "b"))
 
 	describe("MapK") {
+		describe("entrySyntax") {
+			import MapK.entrySyntax._
+			it ("should allow for a convenient MapK.apply with cats.Id value types") {
+				val appliedMap = MapK(Age ~>> 32, Name ~>> "Dylan", Fingers ~>> 10)
+				appliedMap shouldEqual dylan
+			}
+			it ("should allow for a convenient MapK.apply with higher-kinded value types") {
+				val appliedMap = MapK(Age ~> List(1, 2, 3, 4), Name ~> List("a", "b"))
+				appliedMap shouldEqual multi
+			}
+		}
+		
+		describe("equals and hashCode") {
+			import MapK.entrySyntax._
+			it ("should behave properly for identical MapK instances") {
+				val a = MapK(Age ~>> 21, Name ~>> "John Doe", Fingers ~>> 10)
+				val b = MapK(Age ~>> 21, Name ~>> "John Doe", Fingers ~>> 10)
+				a.equals(b) shouldBe true
+				a.hashCode shouldEqual b.hashCode
+			}
+			it ("should behave properly for non-identical MapK instances") {
+				val a = MapK(Age ~>> 21, Name ~>> "John Doe")
+				val b = MapK(Age ~>> 21, Name ~>> "John Doe", Fingers ~>> 10)
+				a.equals(b) shouldBe false
+				a.hashCode should not equal b.hashCode
+			}
+		}
+
 		describe(".untyped") {
 			it("should return a regular Map containing the same entries, minus the explicit type information") {
 				val u = ezio.untyped
@@ -139,7 +167,7 @@ class MapKSpec extends AnyFunSpec with Matchers {
 			it ("should pass each entry to the callback function, in no particular order") {
 				val seenValuesB = List.newBuilder[Any]
 				val seenKeysB = Set.newBuilder[MyKey[_]]
-				ezio.foreach(new FunctionK[ezio.Entry, Lambda[x => Unit]] {
+				ezio.foreach(new FunctionK[ezio.Entry, ({ type F[x] = Unit })#F] {
 					def apply[A](fa: (MyKey[A], Id[A])) = {
 						seenKeysB += fa._1
 						seenValuesB += fa._2
@@ -152,7 +180,9 @@ class MapKSpec extends AnyFunSpec with Matchers {
 
 		describe(".mapValues(f)") {
 			it ("should create a new MapK whose values correspond to the original map values, transformed by f") {
-				val ezioList = ezio.mapValues(Lambda[cats.Id ~> List](v => List(v, v)))
+				val ezioList = ezio.mapValues(new FunctionK[cats.Id, List] {
+					def apply[A](a: A) = List(a, a)
+				})
 				ezioList(Name) shouldEqual List("Ezio Auditore", "Ezio Auditore")
 				ezioList(Age) shouldEqual List(65, 65)
 				ezioList(Fingers) shouldEqual List(9, 9)
@@ -161,9 +191,11 @@ class MapKSpec extends AnyFunSpec with Matchers {
 
 		describe(".map(f)") {
 			it ("should create a new MapK whose entries correspond to the original map entries, transformed by f") {
-				val restoreFinger = Lambda[ezio.Entry ~> cats.Id] {
-					case (Fingers, n) => n + 1
-					case (k, v) => v
+				val restoreFinger = new FunctionK[ezio.Entry, cats.Id] {
+					def apply[A](entry: ezio.Entry[A]) = entry match {
+						case (Fingers, n) => n + 1
+						case (k, v) => v
+					}
 				}
 				val ezio2 = ezio.map(restoreFinger)
 				ezio(Fingers) shouldEqual 9
@@ -191,8 +223,8 @@ class MapKSpec extends AnyFunSpec with Matchers {
 				val max = new FunctionK[MyKey, MapK[MyKey, cats.Id]#Combiner] {
 					def apply[A](fa: MyKey[A]) = fa match {
 						case Name => (l: String, r: String) => (if (l.compareToIgnoreCase(r) > 0) l else r): String
-						case Age => _ max _
-						case Fingers => _ max _
+						case Age => (l: Int, r: Int) => l max r
+						case Fingers => (l: Int, r: Int) => l max r
 					}
 				}
 				val merged1 = ezio.merge(dylan, max)

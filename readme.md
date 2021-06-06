@@ -16,6 +16,10 @@ val info: MapK[MyKey, cats.Id] = MapK.empty[MyKey, cats.Id]
    .updated(Age, 21)
    .updated(Name, "Dylan")
 
+// alternate apply syntax:
+import MapK.entrySyntax._
+val info = MapK(Age ~>> 21, Name ~>> "Dylan")
+
 val age: Option[Int] = info.get(Age) // Some(21)
 val name: Option[String] = info.get(Name) // Some("Dylan")
 val numThings: Option[Int] = info.get(NumThings) // None

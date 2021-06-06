@@ -34,6 +34,22 @@ class MutableMapKSpec extends AnyFunSpec with Matchers{
 	}
 
 	describe("MutableMapK") {
+		describe("equals and hashCode") {
+			it ("should behave properly for identical MutableMapK instances") {
+				val a = makeDemoMap
+				val b = makeDemoMap
+				a.equals(b) shouldBe true
+				a.hashCode shouldEqual b.hashCode
+			}
+			it ("should behave properly for non-identical MutableMapK instances") {
+				val a = makeDemoMap
+				val b = makeDemoMap
+				b.add(Age, 20)
+				a.equals(b) shouldBe false
+				a.hashCode should not equal b.hashCode
+			}
+		}
+
 		describe(".contains(key)") {
 			it ("should return whether or not the map contains the given key") {
 				makeDemoMap.contains(Extra) shouldBe false
@@ -112,7 +128,9 @@ class MutableMapKSpec extends AnyFunSpec with Matchers{
 
 		describe(".mapValues(f)") {
 			it ("should create a new MutableMapK whose values correspond to the original map values, transformed by f") {
-				val mapped: MutableMapK[MyKey, List] = makeDemoMap.mapValues(Lambda[cats.Id ~> List](v => List(v, v)))
+				val mapped: MutableMapK[MyKey, List] = makeDemoMap.mapValues(new FunctionK[cats.Id, List] {
+					def apply[A](v: A) = List(v, v)
+				})
 				mapped(Name) shouldEqual List("demo", "demo")
 				mapped(Age) shouldEqual List(10, 10)
 			}
@@ -154,7 +172,7 @@ class MutableMapKSpec extends AnyFunSpec with Matchers{
 				val seenValuesB = List.newBuilder[Any]
 				val seenKeysB = Set.newBuilder[MyKey[_]]
 				val m = makeDemoMap
-				m.foreach(new FunctionK[m.Entry, Lambda[x => Unit]] {
+				m.foreach(new FunctionK[m.Entry, ({ type F[x] = Unit })#F] {
 					def apply[A](fa: (MyKey[A], Id[A])) = {
 						seenKeysB += fa._1
 						seenValuesB += fa._2

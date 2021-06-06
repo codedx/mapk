@@ -28,24 +28,30 @@ import cats.~>
   * @tparam K
   * @tparam V
   */
-class MutableMapK[K[_], V[_]] private(private val inner: MutableMap[K[_], V[_]]) { self =>
+class MutableMapK[K[*], V[*]] private(private val inner: MutableMap[K[Any], V[Any]]) { self =>
 	def this() = this(MutableMap.empty)
+
+	override def hashCode(): Int = inner.hashCode()
+	override def equals(obj: Any): Boolean = obj match {
+		case m: MutableMapK[_, _] => m.inner == inner
+		case _ => false
+	}
 
 	type Entry[x] = (K[x], V[x])
 	def entry[T](key: K[T], value: V[T]): Entry[T] = (key, value)
 
 	override def toString = inner.toString
 
-	def contains(key: K[_]): Boolean = inner.contains(key)
-	def get[T](key: K[T]): Option[V[T]] = inner.get(key).map(_.asInstanceOf[V[T]])
-	def apply[T](key: K[T]): V[T] = inner(key).asInstanceOf[V[T]]
+	def contains[T](key: K[T]): Boolean = inner.contains(key.asInstanceOf[K[Any]])
+	def get[T](key: K[T]): Option[V[T]] = inner.get(key.asInstanceOf[K[Any]]).map(_.asInstanceOf[V[T]])
+	def apply[T](key: K[T]): V[T] = inner(key.asInstanceOf[K[Any]]).asInstanceOf[V[T]]
 	def add[T](key: K[T], value: V[T]): this.type = {
-		inner.put(key, value)
+		inner.put(key.asInstanceOf[K[Any]], value.asInstanceOf[V[Any]])
 		this
 	}
 	def add[T](entry: Entry[T]): this.type = add(entry._1, entry._2)
 	def remove[T](key: K[T]): Option[V[T]] = {
-		inner.remove(key).map(_.asInstanceOf[V[T]])
+		inner.remove(key.asInstanceOf[K[Any]]).map(_.asInstanceOf[V[T]])
 	}
 	def getOrElseUpdate[T](key: K[T], value: => V[T]) = get(key) match {
 		case None =>
@@ -57,20 +63,21 @@ class MutableMapK[K[_], V[_]] private(private val inner: MutableMap[K[_], V[_]])
 	}
 	def mapValues[U[_]](f: V ~> U) = {
 		val mapped = new MutableMapK[K, U]
-		this.foreach(new FunctionK[Entry, Lambda[x => Unit]] {
+		this.foreach(new FunctionK[Entry, ({ type U[x] = Unit })#U] {
 			def apply[A](kv: (K[A], V[A])): Unit = mapped.add(kv._1, f(kv._2))
 		})
 		mapped
 	}
 	def addFrom(that: MutableMapK[K, V]): this.type = {
-		that.foreach(new FunctionK[Entry, Lambda[x => Unit]] {
+		that.foreach(new FunctionK[Entry, ({ type U[x] = Unit })#U] {
 			def apply[A](kv: (K[A], V[A])): Unit = self.add(kv._1, kv._2)
 		})
 		this
 	}
 	def keys = inner.keySet
-	def foreach(f: Entry ~> Lambda[x => Unit]) = {
-		for ((key, value) <- inner) f(MapK.tuple(key, value))
+	def foreach(f: Entry ~> ({ type U[x] = Unit })#U) = {
+		def handleKv[A](kv: (K[Any], V[Any])) = f(MapK.tuple(kv._1.asInstanceOf[K[A]], kv._2.asInstanceOf[K[A]]))
+		for (kv <- inner) handleKv(kv)
 	}
 
 	def toMap: MapK[K, V] = MapK.coerce[K, V](inner.toMap)
